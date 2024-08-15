@@ -76,6 +76,11 @@ const registerUser = asyncHandler(async (req, res) => {
 // route POST /api/users/logout
 // @access Public
 const logoutUser = asyncHandler(async (req, res) => {
+  console.log("Logging out user JWT : ", req.cookies.jwt); // TODO : REMOVE
+  if (!req.cookies.jwt) {
+    res.status(400);
+    throw new Error("Users is not logged in");
+  }
   res.cookie("jwt", "", {
     expires: new Date(Date.now() + 3 * 1000),
     httpOnly: true,
@@ -112,8 +117,12 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User not found");
   }
+  if (user.email !== req.body.email) {
+    res.status(400);
+    throw new Error("Email cannot be updated");
+  }
   user.name = req.body.name || user.name;
-  user.email = req.body.email || user.email;
+  // user.email = req.body.email || user.email;
   // TODO:If password is provided , need sine re consideration
   if (req.body.password) {
     user.password = req.body.password;
@@ -125,6 +134,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     name: updatedUser.name,
     email: updatedUser.email,
   });
+  console.log("User updated:");
+  console.log(updatedUser);
 });
 
 export {
